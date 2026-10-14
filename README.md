@@ -58,4 +58,3 @@ pipeline/    run_pipeline.py + dashboard template
 outputs/     generated database, KPIs, insights, dashboard
 dashboard/   screenshots
 ```
-# pharma-market-analytics
