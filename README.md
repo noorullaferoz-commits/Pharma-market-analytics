@@ -1,5 +1,7 @@
 # Pharma Market Analytics: Automated KPI Pipeline & Dashboard
 
+**Live dashboard:** https://noorullaferoz-commits.github.io/Pharma-market-analytics/outputs/dashboard.html
+
 An automated Python + SQL pipeline that validates pharma sales data, computes the core commercial KPIs used in pharma market analytics (**Market Share**, **Evolution Index** and **Prescriber Penetration**), generates written insights, and builds an interactive dashboard, all with one command.
 
 > **Data note:** this project uses a **synthetic sample dataset** with fictional brands and companies, designed to mimic monthly pharma secondary-sales data. No real company data is used.
@@ -30,11 +32,13 @@ For the optional `--llm` step, set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`
 | 6. Build | Interactive dashboard: therapy-area filter, trend, EI, share-vs-EI, penetration and regional heatmap, KPI table, light/dark mode, mobile layout | `outputs/dashboard.html` |
 
 ## KPI definitions
+
 - **Market Share** = brand sales ÷ total sales of its therapy-area market
 - **Evolution Index** = (1 + brand growth) ÷ (1 + market growth) × 100. Above 100 means the brand is gaining share.
 - **Penetration Rate** = average monthly prescribing doctors ÷ target doctor universe
 
 ## Dataset
+
 | Table | Rows | Description |
 |---|---|---|
 | `fact_sales` | 960 | Monthly sales (value, units, prescribing doctors): 10 brands × 4 regions × 24 months (2024–2025) |
@@ -42,15 +46,18 @@ For the optional `--llm` step, set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`
 | `dim_doctor_universe` | 8 | Target doctors per therapy area and region |
 
 ## Key insights (from the sample data)
+
 - **Dapaflo** is the fastest share-gainer in diabetes (EI 121): +30.0% growth against a market growing 7.4%.
 - **Sitavia** grew +6.2% but has an EI of 98.9, so it is quietly losing share despite growing.
 - **Empagen** reaches the most diabetes prescribers (42.8%) but holds only 14.2% share, which is an opportunity to deepen usage.
 - **Olmitra** leads hypertension share gains (EI 113), with the strongest reach in the East region.
 
 ## Tools
+
 Python (pandas) · SQL (SQLite) · Plotly.js · optional LLM (OpenAI-compatible API)
 
 ## Structure
+
 ```
 data/        sample CSV files
 sql/         KPI queries
