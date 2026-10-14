@@ -1,0 +1,9 @@
+ta_region_key,therapy_area,region,target_doctors
+Diabetes|North,Diabetes,North,5200
+Diabetes|South,Diabetes,South,6100
+Diabetes|East,Diabetes,East,3400
+Diabetes|West,Diabetes,West,4900
+Hypertension|North,Hypertension,North,6800
+Hypertension|South,Hypertension,South,7400
+Hypertension|East,Hypertension,East,4300
+Hypertension|West,Hypertension,West,6200

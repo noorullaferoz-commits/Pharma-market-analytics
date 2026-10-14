@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pharma Market Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --accent: #1f3864;
+  --good: #006300; --bad: #d03b3b; --badge-bg: #fff3d6; --badge-ink: #7a5200;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
+  --seq: #cde2fb,#9ec5f4,#6da7ec,#3987e5,#256abf,#184f95,#0d366b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #8fb3ea;
+    --good: #0ca30c; --bad: #e66767; --badge-bg: #3a2e12; --badge-ink: #f2c46b;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --accent: #8fb3ea;
+  --good: #0ca30c; --bad: #e66767; --badge-bg: #3a2e12; --badge-ink: #f2c46b;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 24px 16px 40px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: flex-end; justify-content: space-between; margin-bottom: 18px; }
+h1 { margin: 0; font-size: 24px; letter-spacing: -0.01em; }
+.subtitle { color: var(--ink-2); margin-top: 4px; }
+.badge { display: inline-block; background: var(--badge-bg); color: var(--badge-ink); font-size: 12px; font-weight: 600;
+  padding: 2px 8px; border-radius: 999px; margin-left: 8px; vertical-align: middle; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; border: 0; background: transparent; color: var(--ink-2); padding: 8px 16px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); font-weight: 600; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; margin-bottom: 12px; }
+.tile, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.tile { padding: 14px 16px; }
+.tile .label { color: var(--ink-2); font-size: 13px; }
+.tile .value { font-size: 26px; font-weight: 650; margin-top: 2px; }
+.tile .note { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.up { color: var(--good); } .down { color: var(--bad); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.card { padding: 14px 16px 8px; min-width: 0; }
+.card.full { grid-column: 1 / -1; }
+.card h2 { font-size: 15px; margin: 0; }
+.card .desc { color: var(--ink-2); font-size: 13px; margin: 2px 0 4px; }
+.chart { width: 100%; height: 320px; }
+.chart.tall { height: 360px; }
+ul.insights { margin: 8px 0 10px; padding-left: 18px; }
+ul.insights li { margin: 6px 0; }
+.summary { background: var(--page); border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
+.table-wrap { overflow-x: auto; margin: 6px 0 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; font-variant-numeric: tabular-nums; }
+th { color: var(--ink-2); font-weight: 600; }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
+details { margin: 8px 0; } summary { cursor: pointer; color: var(--ink-2); }
+.pass { color: var(--good); font-weight: 600; } .fail { color: var(--bad); font-weight: 600; }
+footer { color: var(--muted); font-size: 12.5px; margin-top: 18px; }
+@media (max-width: 900px) { .tiles { grid-template-columns: repeat(2, minmax(0,1fr)); } .grid { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .tile .value { font-size: 22px; } h1 { font-size: 21px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Pharma Market Analytics <span class="badge">Sample data</span></h1>
+      <div class="subtitle" id="subtitle"></div>
+    </div>
+    <div class="seg" role="group" aria-label="Therapy area" id="taSeg"></div>
+  </header>
+
+  <section class="tiles" id="tiles"></section>
+
+  <section class="grid">
+    <div class="card full">
+      <h2>Market share trend</h2>
+      <p class="desc">Monthly value share by brand, Jan 2024 to Dec 2025</p>
+      <div id="trend" class="chart tall"></div>
+    </div>
+    <div class="card">
+      <h2>Evolution Index</h2>
+      <p class="desc">Above 100 means the brand grew faster than its market</p>
+      <div id="ei" class="chart"></div>
+    </div>
+    <div class="card">
+      <h2>Share vs Evolution Index</h2>
+      <p class="desc">Bubble size is sales value. Top-right brands are large and gaining</p>
+      <div id="scatter" class="chart"></div>
+    </div>
+    <div class="card">
+      <h2>Prescriber penetration</h2>
+      <p class="desc">Average monthly prescribing doctors as a share of target doctors</p>
+      <div id="pen" class="chart"></div>
+    </div>
+    <div class="card">
+      <h2>Penetration by region</h2>
+      <p class="desc">Darker cells mean deeper reach among target doctors</p>
+      <div id="heat" class="chart"></div>
+    </div>
+    <div class="card full">
+      <h2>Key insights</h2>
+      <div id="summary"></div>
+      <ul class="insights" id="insights"></ul>
+    </div>
+    <div class="card full">
+      <h2>Brand KPI table</h2>
+      <div class="table-wrap"><table id="kpiTable"></table></div>
+      <details><summary>Data quality checks</summary><div class="table-wrap"><table id="dq"></table></div></details>
+    </div>
+  </section>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+const DATA = {"generated": "14 Oct 2026, 13:10", "cur": "2025", "prev": "2024", "ta": {"Diabetes": {"brands": ["Glucora", "Sitavia", "Dapaflo", "Empagen", "Glimex"], "market_cr": 180.95, "market_prev_cr": 168.52, "market_growth": 7.4, "months": ["2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01", "2024-05-01", "2024-06-01", "2024-07-01", "2024-08-01", "2024-09-01", "2024-10-01", "2024-11-01", "2024-12-01", "2025-01-01", "2025-02-01", "2025-03-01", "2025-04-01", "2025-05-01", "2025-06-01", "2025-07-01", "2025-08-01", "2025-09-01", "2025-10-01", "2025-11-01", "2025-12-01"], "share_trend": {"Glucora": [32.87, 32.49, 32.29, 31.68, 31.31, 30.79, 30.75, 30.92, 30.3, 30.05, 30.19, 29.94, 29.6, 29.28, 29.31, 28.72, 29.15, 28.29, 28.0, 28.38, 27.41, 27.95, 27.88, 26.81], "Sitavia": [20.52, 20.35, 20.42, 20.06, 19.71, 20.68, 20.63, 20.47, 20.66, 20.5, 20.49, 20.64, 20.59, 20.56, 20.36, 20.38, 20.23, 20.18, 20.25, 19.9, 20.34, 19.92, 19.59, 20.09], "Dapaflo": [15.81, 16.49, 16.5, 17.23, 17.35, 17.79, 18.15, 18.34, 18.67, 18.8, 19.35, 19.15, 19.66, 20.23, 20.85, 20.59, 20.59, 21.57, 21.67, 21.96, 22.38, 22.57, 22.97, 23.45], "Empagen": [11.38, 11.8, 12.03, 12.2, 12.27, 12.68, 12.57, 12.62, 13.0, 13.28, 13.2, 13.05, 13.48, 13.1, 13.29, 13.95, 13.93, 14.36, 14.53, 14.57, 14.74, 14.73, 14.82, 14.94], "Glimex": [19.42, 18.87, 18.76, 18.83, 19.36, 18.07, 17.91, 17.65, 17.37, 17.36, 16.77, 17.22, 16.66, 16.83, 16.2, 16.35, 16.11, 15.6, 15.55, 15.19, 15.13, 14.83, 14.73, 14.71]}, "market_month": [13.57, 14.09, 14.36, 14.32, 14.6, 14.45, 13.96, 13.8, 13.81, 13.76, 13.8, 14.0, 14.49, 15.17, 15.35, 15.32, 15.33, 15.34, 15.01, 15.07, 14.74, 14.87, 14.88, 15.37], "regions": ["North", "South", "East", "West"], "heat": [[19.8, 40.5, 35.3, 35.8], [22.3, 32.5, 37.4, 34.1], [46.7, 25.7, 24.8, 26.2], [47.7, 50.8, 48.2, 23.9], [32.2, 28.7, 32.9, 37.9]], "kpi": [{"brand": "Glucora", "company": "Company A", "molecule": "Metformin", "sales_cr": 51.39, "share": 28.4, "brand_growth": -2.1, "market_growth": 7.4, "ei": 91.2, "penetration": 32.9}, {"brand": "Sitavia", "company": "Company B", "molecule": "Sitagliptin", "sales_cr": 36.55, "share": 20.2, "brand_growth": 6.2, "market_growth": 7.4, "ei": 98.9, "penetration": 31.1}, {"brand": "Dapaflo", "company": "Company C", "molecule": "Dapagliflozin", "sales_cr": 38.98, "share": 21.5, "brand_growth": 30.0, "market_growth": 7.4, "ei": 121.0, "penetration": 31.2}, {"brand": "Empagen", "company": "Company D", "molecule": "Empagliflozin", "sales_cr": 25.7, "share": 14.2, "brand_growth": 21.9, "market_growth": 7.4, "ei": 113.6, "penetration": 42.8}, {"brand": "Glimex", "company": "Company E", "molecule": "Glimepiride", "sales_cr": 28.33, "share": 15.7, "brand_growth": -7.3, "market_growth": 7.4, "ei": 86.3, "penetration": 32.7}], "insights": ["The diabetes market is worth \u20b9180.9 Cr in 2025, growing 7.4% vs 2024. Glucora leads with 28.4% share.", "Dapaflo is the fastest share-gainer (Evolution Index 121): it grew 30.0% against market growth of 7.4%.", "Sitavia looks healthy on sales (+6.2%) but its EI is 98.9, so it is quietly losing share. Recommend reviewing positioning against faster-growing brands.", "Glucora is declining in absolute sales (-2.1%, EI 91).", "Glimex is declining in absolute sales (-7.3%, EI 86).", "Empagen has one of the highest prescriber penetrations (42.8%) but only 14.2% share: many doctors try it but prescribe low volumes. Opportunity: deepen usage among existing prescribers.", "For Dapaflo, penetration is highest in North (46.7%) and lowest in East (24.8%), the clearest region to target next."], "summary": null}, "Hypertension": {"brands": ["Cardiva", "Amlocor", "Olmitra", "Rosartan", "Nebiva"], "market_cr": 153.73, "market_prev_cr": 149.28, "market_growth": 3.0, "months": ["2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01", "2024-05-01", "2024-06-01", "2024-07-01", "2024-08-01", "2024-09-01", "2024-10-01", "2024-11-01", "2024-12-01", "2025-01-01", "2025-02-01", "2025-03-01", "2025-04-01", "2025-05-01", "2025-06-01", "2025-07-01", "2025-08-01", "2025-09-01", "2025-10-01", "2025-11-01", "2025-12-01"], "share_trend": {"Cardiva": [30.28, 30.45, 30.1, 30.77, 30.49, 30.11, 30.1, 30.43, 30.64, 30.96, 30.85, 31.76, 31.05, 30.93, 31.22, 30.71, 30.71, 31.27, 30.75, 31.4, 30.72, 30.69, 31.38, 31.42], "Amlocor": [25.88, 24.67, 25.58, 25.19, 25.9, 25.16, 25.18, 24.82, 24.42, 24.22, 24.8, 23.67, 23.49, 23.72, 23.76, 23.62, 24.24, 23.38, 23.46, 22.81, 23.17, 23.36, 22.7, 22.22], "Olmitra": [13.03, 13.43, 13.58, 13.24, 13.62, 13.95, 14.11, 13.92, 14.35, 14.74, 14.44, 14.9, 14.88, 14.88, 15.12, 15.6, 15.52, 15.52, 15.7, 15.89, 16.31, 16.38, 16.0, 16.93], "Rosartan": [18.77, 19.2, 18.25, 18.28, 17.5, 18.16, 17.98, 18.02, 17.7, 17.23, 17.03, 16.8, 17.29, 17.01, 16.92, 16.78, 16.28, 16.35, 16.45, 15.91, 15.99, 15.48, 15.9, 15.3], "Nebiva": [12.04, 12.24, 12.48, 12.52, 12.49, 12.62, 12.63, 12.81, 12.89, 12.85, 12.88, 12.87, 13.3, 13.46, 12.98, 13.29, 13.26, 13.47, 13.64, 13.98, 13.81, 14.09, 14.03, 14.13]}, "market_month": [12.23, 12.66, 12.63, 12.85, 12.79, 12.57, 12.71, 12.27, 12.06, 11.95, 12.15, 12.41, 12.54, 12.92, 13.17, 13.17, 13.26, 13.1, 12.84, 12.49, 12.42, 12.39, 12.57, 12.88], "regions": ["North", "South", "East", "West"], "heat": [[21.9, 21.1, 35.6, 35.3], [37.5, 24.9, 25.5, 18.8], [27.2, 38.6, 48.8, 37.1], [21.0, 27.2, 23.4, 34.2], [41.1, 26.7, 45.6, 34.3]], "kpi": [{"brand": "Cardiva", "company": "Company A", "molecule": "Telmisartan", "sales_cr": 47.69, "share": 31.0, "brand_growth": 4.5, "market_growth": 3.0, "ei": 101.5, "penetration": 27.4}, {"brand": "Amlocor", "company": "Company F", "molecule": "Amlodipine", "sales_cr": 35.87, "share": 23.3, "brand_growth": -3.7, "market_growth": 3.0, "ei": 93.5, "penetration": 27.0}, {"brand": "Olmitra", "company": "Company C", "molecule": "Olmesartan", "sales_cr": 24.17, "share": 15.7, "brand_growth": 16.2, "market_growth": 3.0, "ei": 112.8, "penetration": 36.9}, {"brand": "Rosartan", "company": "Company G", "molecule": "Losartan", "sales_cr": 25.07, "share": 16.3, "brand_growth": -6.2, "market_growth": 3.0, "ei": 91.0, "penetration": 26.6}, {"brand": "Nebiva", "company": "Company B", "molecule": "Nebivolol", "sales_cr": 20.93, "share": 13.6, "brand_growth": 11.2, "market_growth": 3.0, "ei": 108.0, "penetration": 35.9}], "insights": ["The hypertension market is worth \u20b9153.7 Cr in 2025, growing 3.0% vs 2024. Cardiva leads with 31.0% share.", "Olmitra is the fastest share-gainer (Evolution Index 113): it grew 16.2% against market growth of 3.0%.", "Amlocor is declining in absolute sales (-3.7%, EI 93).", "Rosartan is declining in absolute sales (-6.2%, EI 91).", "Olmitra has one of the highest prescriber penetrations (36.9%) but only 15.7% share: many doctors try it but prescribe low volumes. Opportunity: deepen usage among existing prescribers.", "For Olmitra, penetration is highest in East (48.8%) and lowest in North (27.2%), the clearest region to target next."], "summary": null}}, "checks": [{"check": "fact_sales: required columns", "status": "PASS", "detail": "all present"}, {"check": "fact_sales: no null values", "status": "PASS", "detail": "0 nulls"}, {"check": "dim_brand: required columns", "status": "PASS", "detail": "all present"}, {"check": "dim_brand: no null values", "status": "PASS", "detail": "0 nulls"}, {"check": "dim_doctor_universe: required columns", "status": "PASS", "detail": "all present"}, {"check": "dim_doctor_universe: no null values", "status": "PASS", "detail": "0 nulls"}, {"check": "fact_sales: no negative values", "status": "PASS", "detail": "0 negative cells"}, {"check": "fact_sales: one row per month-brand-region", "status": "PASS", "detail": "0 duplicates"}, {"check": "fact_sales -> dim_brand keys match", "status": "PASS", "detail": "0 orphan rows"}, {"check": "fact_sales -> doctor universe keys match", "status": "PASS", "detail": "0 orphan rows"}, {"check": "continuous monthly coverage", "status": "PASS", "detail": "Jan 2024 to Dec 2025, 24 months"}, {"check": "prescribers never exceed target universe", "status": "PASS", "detail": "0 rows over universe"}]};
+const TAS = Object.keys(DATA.ta);
+let current = TAS[0];
+try { const s = localStorage.getItem("pharma-ta"); if (s && DATA.ta[s]) current = s; } catch (e) {}
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const seriesColor = i => css(`--s${i + 1}`);
+const fmt = (v, d = 1) => Number(v).toFixed(d);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function baseLayout(extra = {}) {
+  const ink2 = css("--ink-2"), grid = css("--grid"), axis = css("--axis");
+  const ax = { gridcolor: grid, linecolor: axis, zerolinecolor: axis, tickfont: { color: ink2, size: 12 },
+               titlefont: { color: ink2, size: 12 }, automargin: true, fixedrange: true };
+  return Object.assign({
+    paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+    font: { family: 'system-ui, -apple-system, "Segoe UI", sans-serif', color: css("--ink"), size: 12 },
+    margin: { l: 8, r: 16, t: 8, b: 8 }, xaxis: { ...ax }, yaxis: { ...ax }, showlegend: false,
+    hoverlabel: { bgcolor: css("--surface"), bordercolor: css("--axis"), font: { color: css("--ink") } },
+    barcornerradius: 4,
+  }, extra);
+}
+const CFG = { displayModeBar: false, responsive: true };
+
+function render() {
+  const d = DATA.ta[current];
+  const brands = d.brands, colorOf = b => seriesColor(brands.indexOf(b));
+  const kpi = d.kpi, byBrand = Object.fromEntries(kpi.map(k => [k.brand, k]));
+  document.getElementById("subtitle").textContent =
+    `${current} market · ${DATA.cur} vs ${DATA.prev} · Market Share, Evolution Index and Prescriber Penetration`;
+
+  // tiles
+  const leader = [...kpi].sort((a, b) => b.share - a.share)[0];
+  const gainer = [...kpi].sort((a, b) => b.ei - a.ei)[0];
+  const lowPen = [...kpi].sort((a, b) => a.penetration - b.penetration)[0];
+  const g = d.market_growth;
+  document.getElementById("tiles").innerHTML = [
+    ["Market size " + DATA.cur, "₹" + fmt(d.market_cr) + " Cr", `₹${fmt(d.market_prev_cr)} Cr in ${DATA.prev}`],
+    ["Market growth", `<span class="${g >= 0 ? "up" : "down"}">${g >= 0 ? "▲" : "▼"} ${fmt(Math.abs(g))}%</span>`, `${DATA.cur} vs ${DATA.prev}`],
+    ["Market leader", esc(leader.brand), `${fmt(leader.share)}% share · ${esc(leader.company)}`],
+    ["Top share gainer", esc(gainer.brand), `Evolution Index ${fmt(gainer.ei, 0)} · lowest reach: ${esc(lowPen.brand)}`],
+  ].map(([l, v, n]) => `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="note">${n}</div></div>`).join("");
+
+  // trend
+  const months = d.months.map(m => m.slice(0, 7));
+  Plotly.react("trend", brands.map(b => ({
+    x: months, y: d.share_trend[b], name: b, type: "scatter", mode: "lines",
+    line: { color: colorOf(b), width: 2 },
+    hovertemplate: `${b}: %{y:.1f}%<extra></extra>`,
+  })), baseLayout({
+    showlegend: true, legend: { orientation: "h", yanchor: "bottom", y: 1.02, x: 0, font: { color: css("--ink-2") } },
+    hovermode: "x unified", xaxis: { ...baseLayout().xaxis, showgrid: false, tickformat: "%b %Y", type: "date" },
+    yaxis: { ...baseLayout().yaxis, ticksuffix: "%", rangemode: "tozero" },
+    margin: { l: 8, r: 16, t: window.innerWidth < 600 ? 64 : 34, b: 8 },
+  }), CFG);
+
+  // EI bar
+  const eiSorted = [...kpi].sort((a, b) => a.ei - b.ei);
+  const eiMin = Math.min(80, ...kpi.map(k => k.ei - 5)), eiMax = Math.max(120, ...kpi.map(k => k.ei + 8));
+  Plotly.react("ei", [{
+    type: "bar", orientation: "h", y: eiSorted.map(k => k.brand), x: eiSorted.map(k => k.ei - 100), base: 100,
+    marker: { color: eiSorted.map(k => colorOf(k.brand)), line: { color: css("--surface"), width: 2 } },
+    text: eiSorted.map(k => fmt(k.ei)), textposition: "outside", textfont: { color: css("--ink-2") }, cliponaxis: false,
+    customdata: eiSorted.map(k => [k.brand_growth, k.market_growth]),
+    hovertemplate: "<b>%{y}</b><br>EI %{text}<br>Brand growth %{customdata[0]:.1f}%<br>Market growth %{customdata[1]:.1f}%<extra></extra>",
+  }], baseLayout({
+    xaxis: { ...baseLayout().xaxis, range: [eiMin, eiMax], showgrid: true },
+    yaxis: { ...baseLayout().yaxis, showgrid: false },
+    shapes: [{ type: "line", x0: 100, x1: 100, yref: "paper", y0: 0, y1: 1, line: { color: css("--ink-2"), width: 1.5, dash: "dot" } }],
+    annotations: [{ x: 100, yref: "paper", y: 1.04, text: "Market = 100", showarrow: false, font: { color: css("--ink-2"), size: 11 } }],
+    margin: { l: 8, r: 24, t: 22, b: 8 },
+  }), CFG);
+
+  // scatter
+  const maxSales = Math.max(...kpi.map(k => k.sales_cr));
+  Plotly.react("scatter", [{
+    type: "scatter", mode: "markers+text", x: kpi.map(k => k.share), y: kpi.map(k => k.ei), text: kpi.map(k => k.brand),
+    textposition: "top center", textfont: { color: css("--ink-2"), size: 12 }, cliponaxis: false,
+    marker: { size: kpi.map(k => 14 + 26 * k.sales_cr / maxSales), color: kpi.map(k => colorOf(k.brand)),
+              line: { color: css("--surface"), width: 2 }, opacity: 0.9 },
+    customdata: kpi.map(k => k.sales_cr),
+    hovertemplate: "<b>%{text}</b><br>Share %{x:.1f}%<br>EI %{y:.1f}<br>Sales ₹%{customdata:.1f} Cr<extra></extra>",
+  }], baseLayout({
+    xaxis: { ...baseLayout().xaxis, title: { text: "Market share (%)" }, ticksuffix: "%" },
+    yaxis: { ...baseLayout().yaxis, title: { text: "Evolution Index" } },
+    shapes: [{ type: "line", xref: "paper", x0: 0, x1: 1, y0: 100, y1: 100, line: { color: css("--ink-2"), width: 1.5, dash: "dot" } }],
+    margin: { l: 8, r: 24, t: 24, b: 8 },
+  }), CFG);
+
+  // penetration bar
+  const penSorted = [...kpi].sort((a, b) => a.penetration - b.penetration);
+  Plotly.react("pen", [{
+    type: "bar", orientation: "h", y: penSorted.map(k => k.brand), x: penSorted.map(k => k.penetration),
+    marker: { color: penSorted.map(k => colorOf(k.brand)), line: { color: css("--surface"), width: 2 } },
+    text: penSorted.map(k => fmt(k.penetration) + "%"), textposition: "outside", textfont: { color: css("--ink-2") }, cliponaxis: false,
+    hovertemplate: "<b>%{y}</b><br>Penetration %{x:.1f}%<extra></extra>",
+  }], baseLayout({
+    xaxis: { ...baseLayout().xaxis, ticksuffix: "%", range: [0, Math.max(...kpi.map(k => k.penetration)) * 1.22] },
+    yaxis: { ...baseLayout().yaxis, showgrid: false }, margin: { l: 8, r: 24, t: 8, b: 8 },
+  }), CFG);
+
+  // heatmap (sequential blue)
+  const seq = css("--seq").split(",").map(s => s.trim());
+  const scale = seq.map((c, i) => [i / (seq.length - 1), c]);
+  const flat = d.heat.flat(), hmin = Math.min(...flat), hmax = Math.max(...flat), mid = (hmin + hmax) / 2;
+  Plotly.react("heat", [{
+    type: "heatmap", z: d.heat, x: d.regions, y: brands, colorscale: scale, zmin: hmin, zmax: hmax, showscale: false,
+    xgap: 2, ygap: 2, hovertemplate: "<b>%{y}</b> · %{x}<br>Penetration %{z:.1f}%<extra></extra>",
+  }], baseLayout({
+    xaxis: { ...baseLayout().xaxis, side: "top", showgrid: false }, yaxis: { ...baseLayout().yaxis, autorange: "reversed", showgrid: false },
+    annotations: d.heat.flatMap((row, i) => row.map((v, j) => ({
+      x: d.regions[j], y: brands[i], text: fmt(v) + "%", showarrow: false,
+      font: { size: 12, color: v > mid ? "#ffffff" : "#0b0b0b" },
+    }))),
+    margin: { l: 8, r: 8, t: 8, b: 8 },
+  }), CFG);
+
+  // insights
+  document.getElementById("summary").innerHTML = d.summary
+    ? `<div class="summary"><b>Executive summary (AI-generated):</b> ${esc(d.summary)}</div>` : "";
+  document.getElementById("insights").innerHTML = d.insights.map(t => `<li>${esc(t)}</li>`).join("");
+
+  // KPI table (accessible view of every chart value)
+  const cls = v => v >= 0 ? "up" : "down";
+  document.getElementById("kpiTable").innerHTML =
+    "<thead><tr><th>Brand</th><th>Company · Molecule</th><th>Sales (₹ Cr)</th><th>Share</th><th>Brand growth</th><th>Market growth</th><th>Evolution Index</th><th>Penetration</th></tr></thead><tbody>" +
+    [...kpi].sort((a, b) => b.share - a.share).map(k => `<tr>
+      <td><span class="swatch" style="background:${colorOf(k.brand)}"></span>${esc(k.brand)}</td>
+      <td>${esc(k.company)} · ${esc(k.molecule)}</td><td>${fmt(k.sales_cr, 2)}</td><td>${fmt(k.share)}%</td>
+      <td class="${cls(k.brand_growth)}">${k.brand_growth >= 0 ? "+" : ""}${fmt(k.brand_growth)}%</td>
+      <td>${k.market_growth >= 0 ? "+" : ""}${fmt(k.market_growth)}%</td>
+      <td class="${k.ei >= 100 ? "up" : "down"}">${fmt(k.ei)}</td><td>${fmt(k.penetration)}%</td></tr>`).join("") + "</tbody>";
+}
+
+function renderStatic() {
+  document.getElementById("taSeg").innerHTML = TAS.map(t =>
+    `<button type="button" data-ta="${esc(t)}" aria-pressed="${t === current}">${esc(t)}</button>`).join("");
+  document.querySelectorAll("#taSeg button").forEach(b => b.addEventListener("click", () => {
+    current = b.dataset.ta;
+    try { localStorage.setItem("pharma-ta", current); } catch (e) {}
+    document.querySelectorAll("#taSeg button").forEach(x => x.setAttribute("aria-pressed", x.dataset.ta === current));
+    render();
+  }));
+  document.getElementById("dq").innerHTML = "<thead><tr><th>Check</th><th>Status</th><th>Detail</th></tr></thead><tbody>" +
+    DATA.checks.map(c => `<tr><td>${esc(c.check)}</td><td class="${c.status === "PASS" ? "pass" : "fail"}">${c.status === "PASS" ? "✓ PASS" : "✕ FAIL"}</td><td>${esc(c.detail)}</td></tr>`).join("") + "</tbody>";
+  document.getElementById("foot").textContent =
+    `Synthetic sample dataset with fictional brands and companies, built for portfolio purposes. Generated ${DATA.generated} by an automated Python + SQL pipeline.`;
+}
+
+renderStatic();
+render();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
+let rz; addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(render, 200); });
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+</body>
+</html>

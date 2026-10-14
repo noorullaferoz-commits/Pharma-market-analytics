@@ -1,0 +1,11 @@
+brand_id,brand,company,molecule,therapy_area
+1,Glucora,Company A,Metformin,Diabetes
+2,Sitavia,Company B,Sitagliptin,Diabetes
+3,Dapaflo,Company C,Dapagliflozin,Diabetes
+4,Empagen,Company D,Empagliflozin,Diabetes
+5,Glimex,Company E,Glimepiride,Diabetes
+6,Cardiva,Company A,Telmisartan,Hypertension
+7,Amlocor,Company F,Amlodipine,Hypertension
+8,Olmitra,Company C,Olmesartan,Hypertension
+9,Rosartan,Company G,Losartan,Hypertension
+10,Nebiva,Company B,Nebivolol,Hypertension

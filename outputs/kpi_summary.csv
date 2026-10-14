@@ -1,0 +1,11 @@
+brand,company,molecule,sales_cr,share,brand_growth,market_growth,ei,penetration,therapy_area
+Glucora,Company A,Metformin,51.3867,0.284,-0.0206,0.0737,91.2106,0.3294,Diabetes
+Sitavia,Company B,Sitagliptin,36.5487,0.202,0.0619,0.0737,98.8998,0.3105,Diabetes
+Dapaflo,Company C,Dapagliflozin,38.9789,0.2154,0.2997,0.0737,121.0396,0.3124,Diabetes
+Empagen,Company D,Empagliflozin,25.6989,0.142,0.2195,0.0737,113.5742,0.4279,Diabetes
+Glimex,Company E,Glimepiride,28.3346,0.1566,-0.0731,0.0737,86.325,0.3266,Diabetes
+Cardiva,Company A,Telmisartan,47.6871,0.3102,0.0448,0.0298,101.4525,0.274,Hypertension
+Amlocor,Company F,Amlodipine,35.8702,0.2333,-0.0374,0.0298,93.4705,0.2697,Hypertension
+Olmitra,Company C,Olmesartan,24.169,0.1572,0.1618,0.0298,112.8167,0.3685,Hypertension
+Rosartan,Company G,Losartan,25.075,0.1631,-0.0625,0.0298,91.0358,0.2658,Hypertension
+Nebiva,Company B,Nebivolol,20.9281,0.1361,0.112,0.0298,107.9784,0.3586,Hypertension
