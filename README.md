@@ -52,9 +52,27 @@ For the optional `--llm` step, set `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`
 - **Empagen** reaches the most diabetes prescribers (42.8%) but holds only 14.2% share, which is an opportunity to deepen usage.
 - **Olmitra** leads hypertension share gains (EI 113), with the strongest reach in the East region.
 
+## Power BI dashboard
+
+The same KPIs rebuilt in Power BI Desktop: [`powerbi/Pharma_Market_Dashboard.pbix`](powerbi/Pharma_Market_Dashboard.pbix)
+
+- **Data model:** star schema with `fact_sales`, `dim_brand`, a calculated `Date` table (marked as the date table) and `dim_doctor_universe` joined through `TREATAS`
+- **12 DAX measures:** Sales, Market Sales (`CALCULATE` + `ALL`), Market Share %, Sales PY and Market Growth % (`SAMEPERIODLASTYEAR`), Evolution Index, average monthly prescribers (`AVERAGEX`), Penetration %
+- **Interactivity:** therapy-area and year slicers, cross-filtering, edited visual interactions, conditional-format heatmap
+
+| Page | What it answers |
+|---|---|
+| Market Overview | Market size, growth, reach, monthly share trend, share by brand |
+| Brand Performance | Who is gaining or losing share (Evolution Index vs 100, share vs EI) |
+| Penetration & Regions | Reach vs share gap, prescriber reach by brand × region |
+
+![Market Overview](dashboard/powerbi_1_market_overview.png)
+![Brand Performance](dashboard/powerbi_2_brand_performance.png)
+![Penetration & Regions](dashboard/powerbi_3_penetration_regions.png)
+
 ## Tools
 
-Python (pandas) · SQL (SQLite) · Plotly.js · optional LLM (OpenAI-compatible API)
+Python (pandas) · SQL (SQLite) · Power BI (DAX) · Plotly.js · optional LLM (OpenAI-compatible API)
 
 ## Structure
 
